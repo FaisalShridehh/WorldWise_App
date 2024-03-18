@@ -79,7 +79,7 @@ export default function CitiesProvider({
 
   return (
     <CitiesContext.Provider
-      value={{ cities, isLoading, currentCity, fetchCityById }}
+      value={{ cities, isLoading, currentCity, fetchCityById, setCities }}
     >
       {children}
     </CitiesContext.Provider>

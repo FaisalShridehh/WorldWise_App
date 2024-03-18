@@ -2,7 +2,7 @@ import React from "react";
 interface ButtonProps {
   children: React.ReactNode;
   type: "primary" | "back" | "position";
-  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   // disabled?: boolean;
   // className?: string;
 }
