@@ -1,6 +1,8 @@
 // "https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=0&longitude=0"
 
 import { useEffect, useState } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 import styles from "./Form.module.css";
 import Button from "../Button/Button";
@@ -35,29 +37,39 @@ function Form() {
   const [date, setDate] = useState(new Date());
   const [notes, setNotes] = useState("");
 
-  const { setCities } = useCities();
+  const {
+    createNewCity,
+    isLoading,
+    //  errorMessage, setErrorMessage
+  } = useCities();
 
   const [geoCodingError, setGeoCodingError] = useState<unknown>("");
 
   const emoji = convertToEmoji(countryCode);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isGeoLoading, setIsGeoLoading] = useState(false);
 
   const [lat, lng] = UseSelectedPosition();
 
   useEffect(() => {
     async function fetchCityData() {
       if (!lat && !lng) return;
+      const controller = new AbortController();
+      const signal = controller.signal;
       try {
-        setIsLoading(true);
+        setIsGeoLoading(true);
         setGeoCodingError("");
+        // setErrorMessage("");
         const res = await fetch(
-          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}`
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}`,
+          {
+            signal,
+          }
         );
 
         const data = await res.json();
 
-        console.log(data);
+        // console.log(data);
         if (!data.countryCode)
           throw new Error(
             `That doesn't seem to be a valid country/city. Click somewhere else 😊`
@@ -67,10 +79,16 @@ function Form() {
         setCountry(data.countryName);
         setCountryCode(data.countryCode);
       } catch (error) {
-        console.error(error);
-        setGeoCodingError(error.message);
+        // console.error(error);
+        if (error instanceof DOMException && error.name === "AbortError") {
+          console.warn("Fetch aborted:", signal.reason);
+        } else {
+          console.error("Fetch error:", error);
+          setGeoCodingError(error.message);
+        }
       } finally {
-        setIsLoading(false);
+        controller.abort();
+        setIsGeoLoading(false);
       }
     }
     fetchCityData();
@@ -78,46 +96,37 @@ function Form() {
 
   async function handleFormSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    try {
-      setIsLoading(true);
-      const res = await fetch("http://localhost:3000/cities", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          cityName,
-          country,
-          emoji: convertToEmoji(countryCode),
-          date,
-          notes,
-          position: {
-            lat: lat,
-            lng: lng,
-          },
-          // id: 73930385,
-        }),
-      });
 
-      const data = await res.json();
-      // console.log(data);
-      setCities((prevCities: []) => [...prevCities, data]);
+    if (!cityName || !date) return;
 
-      navigate("/app");
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
-    }
+    const newCity = {
+      cityName,
+      country,
+      emoji: convertToEmoji(countryCode),
+      date,
+      notes,
+      position: {
+        lat: lat,
+        lng: lng,
+      },
+      // id: 73930385,
+    };
+    await createNewCity(newCity);
+    // if (!errorMessage)
+    navigate("/app");
   }
 
-  if (isLoading) return <Spinner />;
+  if (isGeoLoading) return <Spinner />;
 
+  // if (errorMessage) return <Message message={errorMessage} />;
   if (!lat && !lng)
     return <Message message={"Start by clicking somewhere on the map."} />;
   if (geoCodingError) return <Message message={geoCodingError} />;
   return (
-    <form className={styles.form} onSubmit={handleFormSubmit}>
+    <form
+      className={`${styles.form} ${isLoading ? styles.loading : ""}`}
+      onSubmit={handleFormSubmit}
+    >
       <div className={styles.row}>
         <label htmlFor="cityName">City name</label>
         <input
@@ -130,11 +139,12 @@ function Form() {
 
       <div className={styles.row}>
         <label htmlFor="date">When did you go to {cityName}?</label>
-        <input
+        {/* <input
           id="date"
           onChange={(e) => setDate(e.target.value)}
           value={formatDate(date)}
-        />
+        /> */}
+        <DatePicker selected={date} onChange={(date) => setDate(date)} />
       </div>
 
       <div className={styles.row}>

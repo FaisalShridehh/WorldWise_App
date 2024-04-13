@@ -3,6 +3,7 @@ import styles from "./CityItem.module.css";
 import flagEmojiToPNG from "../../../utils/flagEmojiToPNG";
 import { Link } from "react-router-dom";
 import { useCities } from "../../../hooks/UseCities/UseCities";
+import Spinner from "../../Spinner/Spinner";
 
 // * for Flag to emoji converter
 // const flagEmojiToPNG = (flag: string): React.JSX.Element | null => {
@@ -29,10 +30,14 @@ const formatDate = (date: string): string =>
   }).format(new Date(date));
 
 export default function CityItem({ city }: CityItemProps) {
-  const { currentCity } = useCities();
+  const { currentCity, handleDeleteCityWithId, isLoading } = useCities();
   const { cityName, emoji, date, position, id } = city;
   const { lat, lng } = position;
-  console.log(currentCity);
+
+  // console.log(currentCity);
+
+  if (isLoading) return <Spinner />;
+
   return (
     <li>
       <Link
@@ -44,7 +49,15 @@ export default function CityItem({ city }: CityItemProps) {
         <span className={styles.emoji}>{flagEmojiToPNG(emoji)}</span>
         <h3 className={styles.name}>{cityName}</h3>
         <time className={styles.time}>{formatDate(date)}</time>
-        <button className={styles.deleteBtn}>&times;</button>
+        <button
+          className={styles.deleteBtn}
+          onClick={(e) => {
+            e.preventDefault();
+            handleDeleteCityWithId(id);
+          }}
+        >
+          &times;
+        </button>
       </Link>
     </li>
   );

@@ -10,8 +10,11 @@ import CityList from "./components/CityList/CityList";
 import CountryList from "./components/CountryList/CountryList";
 import City from "./components/CityList/City/City";
 import Form from "./components/Form/Form";
+// import { useCities } from "./hooks/UseCities/UseCities";
 
 function App() {
+  // const { error } = useCities();
+  
   return (
     <BrowserRouter>
       <Routes>
@@ -36,3 +39,11 @@ function App() {
 }
 
 export default App;
+
+// function Error({ error }) {
+//   return (
+//     <div>
+//       <Message message={error["error_message"]} />
+//     </div>
+//   );
+// }
