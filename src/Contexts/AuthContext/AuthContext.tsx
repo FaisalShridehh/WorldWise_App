@@ -4,16 +4,21 @@ import AuthReducer from "../../Reducers/AuthReducer";
 import { AuthActionKind, AuthState } from "../../types/models/AuthReducerType";
 
 interface AuthContextIF {
-  user: object | null;
+  user: {
+    name: string;
+    email: string;
+    password: string;
+    avatar: string;
+  } | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => void;
   logout: () => void;
 }
 const FAKE_USER: UserType = {
-  name: "Jack",
-  email: "jack@example.com",
-  password: "qwerty",
-  avatar: "https://i.pravatar.cc/100?u=zz",
+  name: import.meta.env.VITE_NAME,
+  email: import.meta.env.VITE_EMAIL,
+  password: import.meta.env.VITE_PASSWORD,
+  avatar: import.meta.env.VITE_AVATAR,
 };
 
 export const AuthContext = createContext<AuthContextIF | undefined>(undefined);
