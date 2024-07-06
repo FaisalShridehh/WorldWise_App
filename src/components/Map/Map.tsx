@@ -1,4 +1,4 @@
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import styles from "./Map.module.css";
 import {
   MapContainer,
@@ -9,17 +9,23 @@ import {
   useMapEvents,
 } from "react-leaflet";
 import { useEffect, useState } from "react";
-import { LatLngExpression } from "leaflet";
+import { LatLngExpression, LeafletMouseEvent } from "leaflet";
 import { useCities } from "../../hooks/UseCities/UseCities";
 import flagEmojiToPNG from "../../utils/flagEmojiToPNG";
 import { useGeolocation } from "../../hooks/UseGeoLocation/UseGeoLocation";
 import Button from "../Button/Button";
-import { UseSelectedPosition } from "../../hooks/UseSelectedPosition/UseSelectedPosition";
-export default function Map() {
+import { useSelectedPosition } from "../../hooks/UseSelectedPosition/UseSelectedPosition";
+
+/**
+ * Renders a map component with markers for cities and allows the user to use their position.
+ *
+ * @return {JSX.Element} The rendered map component.
+ */
+export default function Map(): JSX.Element {
   const { cities } = useCities();
   const [mapPosition, setMapPosition] = useState<LatLngExpression>([0, 0]);
   const { isLoading, getPosition, position } = useGeolocation();
-  const [lat, lng] = UseSelectedPosition();
+  const [lat, lng] = useSelectedPosition();
 
   useEffect(() => {
     if (lat && lng) {
@@ -59,35 +65,42 @@ export default function Map() {
             </Popup>
           </Marker>
         ))}
-        {/* <Marker position={mapPosition}>
-          <Popup>
-          A pretty CSS3 popup. <br /> Easily customizable.
-          </Popup>
-        </Marker> */}
-        {/* {lat && lng && ( */}
         <ChangeCenterPosition mapPosition={mapPosition} />
-        {/* )} */}
         <MapClick />
       </MapContainer>
     </div>
   );
 }
 
+/**
+ * Updates the center position of a Leaflet map.
+ *
+ * @param {Object} props - The component props.
+ * @param {LatLngExpression} props.mapPosition - The new center position of the map.
+ * @return {null} This component does not render anything.
+ */
 function ChangeCenterPosition({
   mapPosition,
 }: {
   mapPosition: LatLngExpression;
-}) {
+}): null {
   const map = useMap();
-  map.setView(mapPosition);
+  useEffect(() => {
+    map.setView(mapPosition);
+  }, [map, mapPosition]);
   return null;
 }
 
-function MapClick() {
+/**
+ * Function that handles the click event on the map. Navigates to a form with latitude and longitude parameters.
+ *
+ * @param {LeafletMouseEvent} e - The Leaflet mouse event containing latitude and longitude information.
+ * @return {null} Returns null.
+ */
+function MapClick(): null {
   const navigate = useNavigate();
-  const map = useMapEvents({
-    click: (e) => {
-      console.log(e);
+  useMapEvents({
+    click: (e: LeafletMouseEvent) => {
       navigate(`form?lat=${e.latlng.lat}&lng=${e.latlng.lng}`);
     },
   });

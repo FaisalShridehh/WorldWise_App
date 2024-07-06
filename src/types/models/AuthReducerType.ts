@@ -7,10 +7,11 @@ export enum AuthActionKind {
 }
 // An interface for our state
 export interface AuthState {
-  user: UserType | null;
-  isAuthenticated: boolean;
+  user: UserType | null | undefined;
+  isAuthenticated: boolean | undefined;
 }
 
-export type AuthAction =
-  | { type: AuthActionKind.LOGIN; payload: AuthState }
-  | { type: AuthActionKind.LOGOUT };
+export interface AuthAction {
+  type: AuthActionKind;
+  payload?: AuthState | null;
+}

@@ -1,7 +1,7 @@
 import React from "react";
 
 // * for Flag to emoji converter
-const flagEmojiToPNG = (flag: string): React.JSX.Element | null => {
+const flagEmojiToPNG = (flag: string | undefined): React.JSX.Element | null => {
   if (!flag || flag.length === 0) return null;
 
   const countryCode = Array.from(flag, (codeUnit) => {

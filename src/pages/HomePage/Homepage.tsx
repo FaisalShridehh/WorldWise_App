@@ -3,7 +3,12 @@ import styles from "./Homepage.module.css";
 import PageNav from "../../components/PageNav/PageNav";
 import { useAuth } from "../../hooks/UseAuth/UseAuth";
 
-export default function Homepage() {
+/**
+ * Renders the homepage component.
+ *
+ * @return {JSX.Element} The rendered homepage component.
+ */
+export default function Homepage(): JSX.Element {
   const { user, isAuthenticated } = useAuth();
   return (
     <main className={styles.homepage}>

@@ -2,8 +2,14 @@ import { NavLink } from "react-router-dom";
 import styles from "./PageNav.module.css";
 import Logo from "../Logo/Logo";
 import { useAuth } from "../../hooks/UseAuth/UseAuth";
-import User from "../User/User";
-export default function PageNav() {
+
+
+/**
+ * Renders the page navigation component.
+ *
+ * @return {JSX.Element} The rendered page navigation component.
+ */
+export default function PageNav(): JSX.Element {
   const { user, isAuthenticated } = useAuth();
   return (
     <>

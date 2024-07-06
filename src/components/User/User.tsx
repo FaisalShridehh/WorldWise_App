@@ -9,7 +9,12 @@ import styles from "./User.module.css";
 //   avatar: "https://i.pravatar.cc/100?u=zz",
 // };
 
-function User() {
+/**
+ * Renders a user component that displays the user's avatar, name, and a logout button.
+ *
+ * @return {JSX.Element} The user component.
+ */
+function User(): JSX.Element {
   // const user = FAKE_USER;
 
   const { user, logout } = useAuth();

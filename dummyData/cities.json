@@ -1,39 +1,15 @@
 {
   "cities": [
     {
-      "id": "8165",
-      "cityName": "Amman",
+      "id": "c261",
+      "cityName": "Irbid",
       "country": "Jordan",
       "emoji": "🇯🇴",
-      "date": "2024-03-22T00:21:34.707Z",
+      "date": "2024-07-06T01:00:16.369Z",
       "notes": "",
       "position": {
-        "lat": "32.014104952188596",
-        "lng": "35.97198486328126"
-      }
-    },
-    {
-      "id": "4fdd",
-      "cityName": "Cairo",
-      "country": "Egypt",
-      "emoji": "🇪🇬",
-      "date": "2024-04-13T13:18:15.418Z",
-      "notes": "My fav place",
-      "position": {
-        "lat": "30.051698065765308",
-        "lng": "31.662597656250004"
-      }
-    },
-    {
-      "id": "f257",
-      "cityName": "Amman",
-      "country": "Jordan",
-      "emoji": "🇯🇴",
-      "date": "2024-06-26T19:24:54.237Z",
-      "notes": "",
-      "position": {
-        "lat": "31.947938203811713",
-        "lng": "35.92271804809571"
+        "lat": "32.554771448860606",
+        "lng": "35.84873199462891"
       }
     }
   ]

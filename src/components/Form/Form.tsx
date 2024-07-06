@@ -7,34 +7,46 @@ import "react-datepicker/dist/react-datepicker.css";
 import styles from "./Form.module.css";
 import Button from "../Button/Button";
 import { useNavigate } from "react-router-dom";
-import { UseSelectedPosition } from "../../hooks/UseSelectedPosition/UseSelectedPosition";
+import { useSelectedPosition } from "../../hooks/UseSelectedPosition/UseSelectedPosition";
 import Spinner from "../Spinner/Spinner";
 import flagEmojiToPNG from "../../utils/flagEmojiToPNG";
 import Message from "../Message/Message";
 import { useCities } from "../../hooks/UseCities/UseCities";
 
-export function convertToEmoji(countryCode) {
-  const codePoints = countryCode
+/**
+ * Converts a country code to an emoji flag.
+ *
+ * @param {string} countryCode - The country code to convert.
+ * @return {string} The emoji flag corresponding to the country code.
+ */
+function convertToEmoji(countryCode: string): string {
+  const codePoints: number[] = countryCode
     .toUpperCase()
     .split("")
-    .map((char) => 127397 + char.charCodeAt());
+    .map((char: string): number => 127397 + char.charCodeAt(0));
   return String.fromCodePoint(...codePoints);
 }
 
-const formatDate = (date: string | null) =>
-  new Intl.DateTimeFormat("en", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    weekday: "long",
-  }).format(new Date(date));
+// const formatDate = (date: string | null) =>
+//   new Intl.DateTimeFormat("en", {
+//     day: "numeric",
+//     month: "long",
+//     year: "numeric",
+//     weekday: "long",
+//   }).format(new Date(date));
 
-function Form() {
+/**
+ * Renders a form component for adding a new city to the app.
+ *
+ * @return {JSX.Element} The rendered form component.
+ */
+
+function Form(): JSX.Element {
   const navigate = useNavigate();
   const [cityName, setCityName] = useState("");
   const [country, setCountry] = useState("");
   const [countryCode, setCountryCode] = useState("");
-  const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState<Date | null>(new Date());
   const [notes, setNotes] = useState("");
 
   const {
@@ -43,16 +55,22 @@ function Form() {
     //  errorMessage, setErrorMessage
   } = useCities();
 
-  const [geoCodingError, setGeoCodingError] = useState<unknown>("");
+  const [geoCodingError, setGeoCodingError] = useState<string>("");
 
   const emoji = convertToEmoji(countryCode);
 
   const [isGeoLoading, setIsGeoLoading] = useState(false);
 
-  const [lat, lng] = UseSelectedPosition();
+  const [lat, lng] = useSelectedPosition();
 
   useEffect(() => {
-    async function fetchCityData() {
+    /**
+     * Fetches city data based on the provided latitude and longitude,
+     * updates the state with the retrieved city information, and handles errors.
+     *
+     * @return {Promise<void>} A promise that resolves once the city data is fetched and updated.
+     */
+    async function fetchCityData(): Promise<void> {
       if (!lat && !lng) return;
       const controller = new AbortController();
       const signal = controller.signal;
@@ -82,7 +100,7 @@ function Form() {
         // console.error(error);
         if (error instanceof DOMException && error.name === "AbortError") {
           console.warn("Fetch aborted:", signal.reason);
-        } else {
+        } else if (error instanceof Error) {
           console.error("Fetch error:", error);
           setGeoCodingError(error.message);
         }
@@ -94,6 +112,11 @@ function Form() {
     fetchCityData();
   }, [lat, lng]);
 
+  /**
+   * Handles the form submission event.
+   *
+   * @param {React.FormEvent<HTMLFormElement>} e - The form submission event.
+   */
   async function handleFormSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 

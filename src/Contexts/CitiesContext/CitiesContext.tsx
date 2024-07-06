@@ -1,5 +1,5 @@
-import { createContext, useEffect, useReducer } from "react";
-import { CityType } from "../../types/models/City";
+import { createContext, useCallback, useEffect, useReducer } from "react";
+import { CityType, CurrentCityType } from "../../types/models/City";
 import CitiesReducer from "../../Reducers/CitiesReducer";
 import {
   CitiesActionKind,
@@ -9,8 +9,11 @@ import {
 export interface CityContext {
   cities: CityType[];
   isLoading: boolean;
-  currentCity: object;
-  error: object;
+  currentCity: CurrentCityType;
+  error: {
+    error_name: Error["name"];
+    error_message: Error["message"];
+  };
   // errorMessage: unknown;
   // setErrorMessage: (state: unknown) => unknown;
   fetchCityById: (cityId: string | undefined) => Promise<void>;
@@ -40,11 +43,21 @@ const initialState: CitiesState = {
 };
 export const CitiesContext = createContext<CityContext | undefined>(undefined);
 
+/**
+ * Creates a CitiesProvider component that wraps its children with a CitiesContext.Provider.
+ * The CitiesProvider component fetches cities from a server and provides functions to fetch a city by id,
+ * create a new city, and delete a city.
+ *
+ * @param {Object} props - The props object containing the children to be wrapped by the CitiesProvider.
+ * @param {React.ReactNode} props.children - The children to be wrapped by the CitiesProvider.
+ * @return {JSX.Element} A CitiesContext.Provider component that wraps the children with the CitiesProvider context.
+ */
+
 export default function CitiesProvider({
   children,
 }: {
   children: React.ReactNode;
-}) {
+}): JSX.Element {
   const [state, dispatch] = useReducer(CitiesReducer, initialState);
   // const [cities, setCities] = useState<CityType[]>([]);
   // const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -52,14 +65,14 @@ export default function CitiesProvider({
   // const [errorMessage, setErrorMessage] = useState<unknown>("");
 
   useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
+    // const controller = new AbortController();
+    // const signal = controller.signal;
     async function fetchCities() {
       try {
         // setIsLoading(true);
         dispatch({ type: CitiesActionKind.LOADING, payload: true });
         const citiesRes = await fetch("http://localhost:3000/cities", {
-          signal,
+          // signal,
         });
 
         if (!citiesRes.ok) {
@@ -70,19 +83,20 @@ export default function CitiesProvider({
         const data = await citiesRes.json();
 
         // setCities(data);
-        dispatch({ type: CitiesActionKind.CITIES_lOADED, payload: data });
+        dispatch({ type: CitiesActionKind.CITIES_LOADED, payload: data });
       } catch (error) {
         // console.error(error);
         if (error instanceof DOMException && error.name === "AbortError") {
-          console.warn("Fetch aborted:", signal.reason);
+          // console.warn("Fetch aborted:", signal.reason);
           dispatch({
             type: CitiesActionKind.REJECTED,
             payload: {
               error_name: error.name,
-              error_message: signal.reason,
+              // error_message: signal.reason,
+              error_message: "signal.reason",
             },
           });
-        } else {
+        } else if (error instanceof Error) {
           console.error("Fetch error:", error);
           dispatch({
             type: CitiesActionKind.REJECTED,
@@ -95,62 +109,67 @@ export default function CitiesProvider({
       } finally {
         dispatch({ type: CitiesActionKind.LOADING, payload: false });
 
-        controller.abort();
+        // controller.abort();
       }
     }
 
     fetchCities();
     // Cleanup function to abort the fetch if the component unmounts
-    return () => controller.abort();
+    // return () => controller.abort();
   }, []);
 
-  async function fetchCityById(cityId: string | undefined): Promise<void> {
-    if (cityId === state.currentCity.id) return;
-    const controller = new AbortController();
-    const signal = controller.signal;
-    try {
-      dispatch({ type: CitiesActionKind.LOADING, payload: true });
+  const fetchCityById = useCallback(
+    async function fetchCityById(cityId: string | undefined): Promise<void> {
+      if (cityId === state.currentCity.id) return;
+      // const controller = new AbortController();
+      // const signal = controller.signal;
+      try {
+        dispatch({ type: CitiesActionKind.LOADING, payload: true });
 
-      const citiesRes = await fetch(
-        `http://localhost:3000/cities?id=${cityId}`,
-        {
-          signal,
+        const citiesRes = await fetch(
+          `http://localhost:3000/cities?id=${cityId}`,
+          {
+            // signal,
+          }
+        );
+
+        if (!citiesRes.ok) {
+          throw new Error("Something went wrong");
         }
-      );
 
-      if (!citiesRes.ok) {
-        throw new Error("Something went wrong");
+        const data = await citiesRes.json();
+        // setCurrentCity(data[0]);
+        dispatch({ type: CitiesActionKind.CITY_LOADED, payload: data[0] });
+        // console.log(data);
+      } catch (error) {
+        // console.error(error);
+        if (error instanceof DOMException && error.name === "AbortError") {
+          // console.warn("Fetch aborted:", signal.reason);
+          dispatch({
+            type: CitiesActionKind.REJECTED,
+            payload: {
+              error_name: error.name,
+              // error_message: signal.reason,
+              error_message: "Fetch aborted",
+            },
+          });
+        } else if (error instanceof Error) {
+          console.error("Fetch error:", error);
+          dispatch({
+            type: CitiesActionKind.REJECTED,
+            payload: {
+              error_name: error.name,
+              error_message: error.message,
+            },
+          });
+        }
+      } finally {
+        dispatch({ type: CitiesActionKind.LOADING, payload: false });
+        // controller.abort();
       }
-
-      const data = await citiesRes.json();
-      // setCurrentCity(data[0]);
-      dispatch({ type: CitiesActionKind.CITY_lOADED, payload: data[0] });
-    } catch (error) {
-      // console.error(error);
-      if (error instanceof DOMException && error.name === "AbortError") {
-        console.warn("Fetch aborted:", signal.reason);
-        dispatch({
-          type: CitiesActionKind.REJECTED,
-          payload: {
-            error_name: error.name,
-            error_message: signal.reason,
-          },
-        });
-      } else {
-        console.error("Fetch error:", error);
-        dispatch({
-          type: CitiesActionKind.REJECTED,
-          payload: {
-            error_name: error.name,
-            error_message: error.message,
-          },
-        });
-      }
-    } finally {
-      dispatch({ type: CitiesActionKind.LOADING, payload: false });
-      controller.abort();
-    }
-  }
+    },
+    [state.currentCity.id]
+  );
 
   async function createNewCity(newCity: NewCity) {
     const controller = new AbortController();
@@ -197,7 +216,7 @@ export default function CitiesProvider({
       //   console.warn(error.message);
       //   // setErrorMessage(error.message);
       // }
-      else {
+      else if (error instanceof Error) {
         console.error("Fetch error:", error);
         dispatch({
           type: CitiesActionKind.REJECTED,
@@ -223,19 +242,21 @@ export default function CitiesProvider({
       });
 
       const data = await res.json();
-      // console.log(data);
+      console.log(data);
 
       // setCities((prevCities) => prevCities.filter((c) => c.id !== data.id));
       dispatch({ type: CitiesActionKind.CITY_DELETED, payload: id });
     } catch (error) {
       console.error(error);
-      dispatch({
-        type: CitiesActionKind.REJECTED,
-        payload: {
-          error_name: error.name,
-          error_message: error.message,
-        },
-      });
+      if (error instanceof Error) {
+        dispatch({
+          type: CitiesActionKind.REJECTED,
+          payload: {
+            error_name: error.name,
+            error_message: error.message,
+          },
+        });
+      }
     } finally {
       dispatch({ type: CitiesActionKind.LOADING, payload: false });
     }

@@ -1,4 +1,4 @@
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useEffect } from "react";
 import { useCities } from "../../../hooks/UseCities/UseCities";
 import styles from "./City.module.css";
@@ -6,20 +6,36 @@ import Spinner from "../../Spinner/Spinner";
 import Button from "../../Button/Button";
 import flagEmojiToPNG from "../../../utils/flagEmojiToPNG";
 
-const formatDate = (date: string | null) =>
-  new Intl.DateTimeFormat("en", {
+/**
+ * Formats a given date string into a localized date string.
+ *
+ * @param {string | null} date - The date string to format. If null, returns null.
+ * @return {string | null} - The formatted date string, or null if the input is null.
+ */
+
+const formatDate = (date: string | null): string | null => {
+  if (date === null) {
+    return null;
+  }
+  return new Intl.DateTimeFormat("en", {
     day: "numeric",
     month: "long",
     year: "numeric",
     weekday: "long",
   }).format(new Date(date));
+};
+/**
+ * Renders the City component, which displays information about a specific city.
+ *
+ * @return {JSX.Element} The City component.
+ */
 
-function City() {
+function City(): JSX.Element {
   const { currentCity, fetchCityById, isLoading } = useCities();
   const cityParams = useParams();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const lat = searchParams.get("lat");
-  const lng = searchParams.get("lng");
+  // const [searchParams, setSearchParams] = useSearchParams();
+  // const lat = searchParams.get("lat");
+  // const lng = searchParams.get("lng");
 
   const navigate = useNavigate();
 
@@ -35,7 +51,7 @@ function City() {
 
   useEffect(() => {
     fetchCityById(cityId);
-  }, [cityId]);
+  }, [cityId, fetchCityById]);
 
   const { cityName, emoji, date, notes } = currentCity;
 

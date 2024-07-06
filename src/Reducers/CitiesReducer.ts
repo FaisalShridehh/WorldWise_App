@@ -14,9 +14,9 @@ export default function CitiesReducer(
     case CitiesActionKind.REJECTED:
       return { ...state, error: action.payload };
 
-    case CitiesActionKind.CITIES_lOADED:
+    case CitiesActionKind.CITIES_LOADED:
       return { ...state, isLoading: false, cities: action.payload };
-    case CitiesActionKind.CITY_lOADED:
+    case CitiesActionKind.CITY_LOADED:
       return { ...state, isLoading: false, currentCity: action.payload };
 
     case CitiesActionKind.CITY_CREATED:
@@ -36,8 +36,6 @@ export default function CitiesReducer(
       };
 
     default:
-      throw new Error(
-        `Action ${action.type} not supported and unknown action type`
-      );
+      throw new Error(`Unknown action type: ${(action as CitiesAction).type}`);
   }
 }

@@ -12,8 +12,8 @@ export default function AuthReducer(
     case AuthActionKind.LOGIN:
       return {
         ...state,
-        user: action.payload.user,
-        isAuthenticated: action.payload.isAuthenticated,
+        user: action?.payload?.user,
+        isAuthenticated: action?.payload?.isAuthenticated,
       };
     case AuthActionKind.LOGOUT:
       return {

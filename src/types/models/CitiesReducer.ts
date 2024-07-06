@@ -2,8 +2,8 @@ import { CityType, CurrentCityType } from "./City";
 
 // An enum with all the types of actions to use in our reducer
 export enum CitiesActionKind {
-  CITIES_lOADED = "cities/loaded",
-  CITY_lOADED = "city/loaded",
+  CITIES_LOADED = "cities/loaded",
+  CITY_LOADED = "city/loaded",
   CITY_CREATED = "city/created",
   CITY_DELETED = "city/deleted",
   LOADING = "loading",
@@ -16,14 +16,14 @@ export interface CitiesState {
   isLoading: boolean;
   currentCity: CurrentCityType;
   error: {
-    error_name: string;
-    error_message: string;
+    error_name: Error["name"];
+    error_message: Error["message"];
   };
 }
 
 export type CitiesAction =
-  | { type: CitiesActionKind.CITIES_lOADED; payload: CityType[] }
-  | { type: CitiesActionKind.CITY_lOADED; payload: CurrentCityType }
+  | { type: CitiesActionKind.CITIES_LOADED; payload: CityType[] }
+  | { type: CitiesActionKind.CITY_LOADED; payload: CurrentCityType }
   | {
       type: CitiesActionKind.CITY_CREATED;
       payload: CityType;
@@ -36,11 +36,10 @@ export type CitiesAction =
   | {
       type: CitiesActionKind.REJECTED;
       payload: {
-        error_name: string;
-        error_message: string;
+        error_name: Error["name"];
+        error_message: Error["message"];
       };
     };
-
 // // An interface for our actions
 // export interface CitiesAction {
 //   type: CitiesActionKind;
